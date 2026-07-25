@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #1a3a2a;
+  color: #f5f0e8;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.screen {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.logo {
+  font-size: 56px;
+  text-align: center;
+}
+
+h1 {
+  font-family: Georgia, serif;
+  color: #c9a84c;
+  font-size: 28px;
+  text-align: center;
+}
+
+.subtitle {
+  color: #6b6b5a;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-family: Georgia, serif;
+  color: #e8c96a;
+  font-size: 20px;
+}
+
+label {
+  font-size: 13px;
+  color: #f5f0e8;
+}
+
+input {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid #2d5c44;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #f5f0e8;
+  font-size: 15px;
+  width: 100%;
+}
+
+.btn-primary {
+  background: #c9a84c;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #e8c96a;
+  border: 1px solid #c9a84c;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+}
+
+#colourPalette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#colourPalette button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+#chipList > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+#chipList span:first-child {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+#chipList button {
+  background: none;
+  border: none;
+  color: #cc4444;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: auto;
+  padding: 4px 8px;
+}
+
+#colourPalette button.selected {
+  border: 2px solid #ffffff;
+  transform: scale(1.15);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}

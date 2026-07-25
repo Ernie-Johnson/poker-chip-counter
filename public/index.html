@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chip Count</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="screen" id="screen-home">
+    <div class="logo">♠</div>
+    <h1>Chip Count</h1>
+    <p class="subtitle">End-of-game chip calculator</p>
+
+    <button class="btn-primary" onclick="showScreen('screen-create')">
+      Create a room
+    </button>
+    <button class="btn-secondary" onclick="showScreen('screen-join')">
+      Join a room
+    </button>
+  </div>
+
+  <div class="screen hidden" id="screen-create">
+    <h2>Create a room</h2>
+    <label>Your name</label>
+    <input type="text" id="host-name" placeholder="e.g. James">
+    <button class="btn-primary" onclick="createRoom()">Create →</button>
+    <button class="btn-secondary" onclick="showScreen('screen-home')">Back</button>
+  </div>
+
+  <div class="screen hidden" id="screen-join">
+    <h2>Join a room</h2>
+    <label>Your name</label>
+    <input type="text" id="player-name" placeholder="e.g. James">
+    <label>Room code</label>
+    <input type="text" id="room-code" placeholder="e.g. HAYEFD">
+    <button class="btn-primary" onclick="joinRoom()">Join →</button>
+    <button class="btn-secondary" onclick="showScreen('screen-home')">Back</button>
+  </div>
+
+  <div class="screen hidden" id="screen-chips">
+    <h2>Set the chip values</h2>
+    <div id="chipList"></div>
+    <label>Enter the chip value in pence</label>
+    <input type="number" id="chipValue">
+    <div id="colourPalette">
+      <button data-colour="white" data-hex="#e8e8e0" onclick="selectColour(this)"></button>
+      <button data-colour="red" data-hex="#ff0000" onclick="selectColour(this)"></button>
+      <button data-colour="blue" data-hex="#2060a0" onclick="selectColour(this)"></button>
+      <button data-colour="green" data-hex="#1e7a3e" onclick="selectColour(this)"></button>
+      <button data-colour="black" data-hex="#1a1a1a" onclick="selectColour(this)"></button>
+      <button data-colour="purple" data-hex="#6a2fa0" onclick="selectColour(this)"></button>
+      <button data-colour="yellow" data-hex="#d4b800" onclick="selectColour(this)"></button>
+      <button data-colour="pink" data-hex="#c0507a" onclick="selectColour(this)"></button>
+      <button data-colour="orange" data-hex="#d46a10" onclick="selectColour(this)"></button>
+    </div>
+    <button class="btn-secondary" onclick="addChip()">Add chip</button>
+    <button class="btn-primary" onclick="confirmChips()">Confirm chips</button>
+  </div>
+
+  <div class="screen hidden" id="screen-lobby">
+    <h1>Room Code: <span id="roomCodeDisplay"></span></h1>
+    <h2>Players:</h2>
+    <div id="playerList">
+    </div>
+    <button> </button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
