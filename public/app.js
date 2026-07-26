@@ -1,10 +1,18 @@
-let rooms = [];
+let socket = io();
+
 let currentRoom = null;
 let selectedColour = null;
 
 window.onload = function(){
   document.querySelectorAll("#colourPalette button").forEach(s => s.style.backgroundColor = s.dataset.hex)
 }
+
+// Updates screen once confirmed room is created
+socket.on("room-created", (data) => {
+  currentRoom = {code: data.code, playerID: data.playerID};
+  addPlayerUI(data.name);
+  showScreen("screen-chips");
+})
 
 // Switch between screens
 function showScreen(id) {
@@ -17,14 +25,9 @@ function createRoom() {
   const name = document.getElementById('host-name').value.trim();
   if (!name) return alert('Please enter your name');
 
-  // creates the room once it has received a name
-  let room = new Room();
-  room.addPlayer(name);
-  addPlayerUI(name); // adds player to the list on room-lobby screen
-  rooms.push(room);
-  currentRoom = room;
-
-  showScreen("screen-chips");
+  // emits the data to the server to create the room
+  socket.emit("create-room", name);
+  document.getElementById("create-room-button").disabled = true;
 }
 
 function selectColour(button){
@@ -102,32 +105,3 @@ function addPlayerUI(name){
   playerList.appendChild(newPlayer);
 }
 
-class Room{
-  constructor(){  
-    this.players = []; // used to store all the players in the room
-    this.chipValues = {}; // used to store the values of each chip
-    this.roomCode = this.generateCode();
-    this.IdIndex = 0; // used to index the IDs of the players as they join
-    this.hostId = null; // used to store ID of the host of the room
-  }
-  generateCode(){
-    let result = "";
-    for(let i=0; i<6; i++){
-      result += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
-    }
-    return result;
-  }
-  addPlayer(playerName){
-    let player = {name: playerName, ID: this.IdIndex, chipCount: null};
-
-    if(this.players.length == 0){
-      this.hostId = this.IdIndex;
-    }
-
-    this.players.push(player);
-    this.IdIndex++;
-  }
-  setChipValues(values){ // should be an object as the parameter
-    this.chipValues = values;
-  }
-}
