@@ -48,12 +48,39 @@ io.on("connection", (socket) => {
 
     })
 
-    socket.on("create-room", (name) =>{
+    socket.on("create-room", (name) =>{ 
         let room = new Room();
         let player = room.addPlayer(name);
         rooms.push(room);
         
         socket.emit("room-created", {code: room.roomCode, playerID: player.ID, name: player.name});
+    })
+
+    socket.on("add-chip", (data) => {
+        let room = rooms.find(r => r.roomCode === data.code);
+
+        if(!room){
+          socket.emit("chip-add-result", {success: false, error: "Room not found"});
+          return;
+        }
+
+        if(!data.colour){ // checks whether a colour has been selected
+          socket.emit("chip-add-result", {success: false, error: "No colour selected"});
+          return;
+        }
+
+        if(data.value < 1 || !Number.isInteger(data.value)){
+          socket.emit("chip-add-result", {success: false, error: "Chip value is invalid. Should be at least 1 and an integer"});
+          return;
+        }
+
+        if(room.chipValues.hasOwnProperty(data.colour)){ // checks whether colour has already been used
+          socket.emit("chip-add-result", {success: false, error: "Chip colour already exists"});
+          return;
+        }
+
+        room.chipValues[data.colour] = data.value;
+        socket.emit("chip-add-result", {success: true, colour: data.colour, value: data.value})
     })
 });
 app.use(express.static("public"));

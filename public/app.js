@@ -9,9 +9,43 @@ window.onload = function(){
 
 // Updates screen once confirmed room is created
 socket.on("room-created", (data) => {
-  currentRoom = {code: data.code, playerID: data.playerID};
+  currentRoom = {code: data.code, playerID: data.playerID}; // used to identify which room player is in
   addPlayerUI(data.name);
   showScreen("screen-chips");
+})
+
+// Updates screen once chip has been confirmed
+socket.on("chip-add-result", (data) => { // data contains: success, colour, value (if successfull)
+  if(data.success === false){
+    return alert(data.error);
+  }
+  else if(data.success === true){
+    let chipList = document.getElementById("chipList"); 
+    let newDiv = document.createElement("div"); // creating a div for the new chip
+
+    let button = document.querySelector(`button[data-colour="${data.colour}"]`); // finds button with data.colour value
+    let colourCircle = document.createElement("span");
+    colourCircle.style.backgroundColor = button.dataset.hex;
+    newDiv.appendChild(colourCircle); // adding a circle representing colour
+
+    let colourName = document.createElement("span");
+    colourName.textContent = data.colour;
+    newDiv.appendChild(colourName); // adding name of the colour
+
+    let price = document.createElement("span");
+    price.textContent = data.value;
+    newDiv.appendChild(price); // adding value of the chip
+
+    let deleteButton = document.createElement("button");
+    deleteButton.textContent = "✕";
+    deleteButton.onclick = function(){ // this needs to be fixed
+      delete currentRoom.chipValues[chipColour];
+      newDiv.remove();
+    }
+    newDiv.appendChild(deleteButton); // adding button to delete this chip config
+
+    chipList.appendChild(newDiv);
+  }
 })
 
 // Switch between screens
@@ -42,46 +76,18 @@ function addChip(){
   let chipValue = Number(document.getElementById("chipValue").value);
   let chipColour = null;
 
+  //client side testing
   if(selectedColour){ // checks whether a colour has been selected
     chipColour = selectedColour.name;
   }else{
     return alert("Please select a colour");
   }
 
-  if(currentRoom.chipValues.hasOwnProperty(selectedColour.name)){ // checks whether colour has already been used
-    return alert("This colour chip already exists");
-  }
-
   if(chipValue < 1 || !Number.isInteger(chipValue)){
     return alert("Chip value is invalid. Should be at least 1 and an integer");
   }
-  
-  currentRoom.chipValues[chipColour] = chipValue;
 
-  let chipList = document.getElementById("chipList"); 
-  let newDiv = document.createElement("div"); // creating a div for the new chip
-
-  let colourCircle = document.createElement("span");
-  colourCircle.style.backgroundColor = selectedColour.hexcode;
-  newDiv.appendChild(colourCircle); // adding a circle representing colour
-
-  let colourName = document.createElement("span");
-  colourName.textContent = selectedColour.name;
-  newDiv.appendChild(colourName); // adding name of the colour
-
-  let price = document.createElement("span");
-  price.textContent = chipValue;
-  newDiv.appendChild(price); // adding value of the chip
-
-  let deleteButton = document.createElement("button");
-  deleteButton.textContent = "✕";
-  deleteButton.onclick = function(){
-    delete currentRoom.chipValues[chipColour];
-    newDiv.remove();
-  }
-  newDiv.appendChild(deleteButton); // adding button to delete this chip config
-
-  chipList.appendChild(newDiv);
+  socket.emit("add-chip", {value: chipValue, colour: chipColour, code: currentRoom.code});
 
   // resetting selected colour and chip value
   selectedColour = null;
