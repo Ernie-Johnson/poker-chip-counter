@@ -25,7 +25,12 @@ socket.on("chip-add-result", (data) => { // data contains: success, colour, valu
 
     let button = document.querySelector(`button[data-colour="${data.colour}"]`); // finds button with data.colour value
     let colourCircle = document.createElement("span");
-    colourCircle.style.backgroundColor = button.dataset.hex;
+    if(button){
+      colourCircle.style.backgroundColor = button.dataset.hex;
+    }else{
+      colourCircle.style.backgroundColor = "#808080";
+    }
+    
     newDiv.appendChild(colourCircle); // adding a circle representing colour
 
     let colourName = document.createElement("span");
@@ -38,8 +43,8 @@ socket.on("chip-add-result", (data) => { // data contains: success, colour, valu
 
     let deleteButton = document.createElement("button");
     deleteButton.textContent = "✕";
-    deleteButton.onclick = function(){ // this needs to be fixed
-      delete currentRoom.chipValues[chipColour];
+    deleteButton.onclick = function(){ // removes chip config from screen when X pressed
+      socket.emit("remove-chip", {colour: data.colour, code: currentRoom.code});
       newDiv.remove();
     }
     newDiv.appendChild(deleteButton); // adding button to delete this chip config
@@ -90,8 +95,11 @@ function addChip(){
   socket.emit("add-chip", {value: chipValue, colour: chipColour, code: currentRoom.code});
 
   // resetting selected colour and chip value
+  let highlighted = document.querySelector("#colourPalette button.selected");
+
   selectedColour = null;
   document.getElementById("chipValue").value = "";
+  if(highlighted) highlighted.classList.remove("selected");
 }
 
 function confirmChips(){

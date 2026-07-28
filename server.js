@@ -82,6 +82,14 @@ io.on("connection", (socket) => {
         room.chipValues[data.colour] = data.value;
         socket.emit("chip-add-result", {success: true, colour: data.colour, value: data.value})
     })
+
+    socket.on("remove-chip", (data) =>{
+      let room = rooms.find(r => r.roomCode === data.code);
+      if(!room) return;
+      if(room.chipValues.hasOwnProperty(data.colour)){
+        delete room.chipValues[data.colour];
+      }
+    })
 });
 app.use(express.static("public"));
 server.listen(3000);
