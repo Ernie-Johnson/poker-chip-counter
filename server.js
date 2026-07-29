@@ -90,6 +90,19 @@ io.on("connection", (socket) => {
         delete room.chipValues[data.colour];
       }
     })
+
+    socket.on("confirm-chip", (data) => {
+      let room = rooms.find(r => r.roomCode === data.code);
+      if(!room) return;
+
+      if(Object.keys(room.chipValues).length == 0){
+        socket.emit("chip-confirm-result", {success: false, error: "No chips added"});
+        return;
+      }
+      socket.emit("chip-confirm-result", {success: true});
+    })
+
+  
 });
 app.use(express.static("public"));
 server.listen(3000);

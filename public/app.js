@@ -53,6 +53,16 @@ socket.on("chip-add-result", (data) => { // data contains: success, colour, valu
   }
 })
 
+socket.on("chip-confirm-result", (data) => {
+  if(data.success === false){
+    return alert(data.error);
+  }
+  else if(data.success === true){
+    showScreen("screen-lobby");
+    document.getElementById("roomCodeDisplay").textContent = currentRoom.code;
+  }
+})
+
 // Switch between screens
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -104,12 +114,7 @@ function addChip(){
 
 function confirmChips(){
   // needs to validate that conditions are met
-  if(Object.keys(currentRoom.chipValues).length == 0){
-    return alert("No chips created");
-  }
-  showScreen("screen-lobby");
-  document.getElementById("roomCodeDisplay").textContent = currentRoom.roomCode;
-
+  socket.emit("confirm-chip", {code: currentRoom.code});
 }
 
 function addPlayerUI(name){
