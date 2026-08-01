@@ -9,8 +9,8 @@ window.onload = function(){
 
 // Updates screen once confirmed room is created
 socket.on("room-created", (data) => {
-  currentRoom = {code: data.code, playerID: data.playerID}; // used to identify which room player is in
-  addPlayerUI(data.name);
+  currentRoom = {code: data.code, playerID: data.player.ID}; // used to identify which room player is in
+  addPlayerUI(data.player);
   showScreen("screen-chips");
 })
 
@@ -63,6 +63,20 @@ socket.on("chip-confirm-result", (data) => {
   }
 })
 
+socket.on("join-room-result", (data) => {
+  if(data.success === false){
+    document.getElementById("join-room-button").disabled = false;
+    return alert(data.error);
+  }
+  else if(data.success === true){
+    currentRoom = {code: data.code, playerID: data.player.ID};
+    showScreen("screen-lobby");
+    document.getElementById("roomCodeDisplay").textContent = currentRoom.code;
+    renderPlayerList(data.players);
+  }
+
+})
+
 // Switch between screens
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -113,14 +127,36 @@ function addChip(){
 }
 
 function confirmChips(){
-  // needs to validate that conditions are met
   socket.emit("confirm-chip", {code: currentRoom.code});
 }
 
-function addPlayerUI(name){
+function addPlayerUI(player){
   let playerList = document.getElementById("playerList");
   let newPlayer = document.createElement("span");
-  newPlayer.textContent = name;
+  newPlayer.textContent = player.name;
   playerList.appendChild(newPlayer);
 }
 
+function joinRoom(){
+  let joinCode = document.getElementById("room-code").value.toUpperCase();
+  let playerName = document.getElementById("player-name").value;
+
+  if(joinCode === "" || joinCode.length != 6){
+    return alert("Room code is invalid");
+  }
+  if(playerName.length === 0){
+    return alert("Enter a name");
+  }
+
+  socket.emit("join-room", {name: playerName, code: joinCode});
+  document.getElementById("join-room-button").disabled = true;
+}
+
+function renderPlayerList(players){
+  let playerList = document.getElementById("playerList");
+  playerList.replaceChildren();
+
+  for (let player of players){
+    addPlayerUI(player);
+  } 
+}

@@ -45,7 +45,14 @@ io.on("connection", (socket) => {
     console.log("Someone connected!");
 
     socket.on("join-room", (data) => {
+      let room = rooms.find(r => r.roomCode === data.code);
+      if(!room) {
+        socket.emit("join-room-result", {success: false, error: "Room doesn't exist"});
+        return;
+      }
 
+      let player = room.addPlayer(data.name);
+      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players})
     })
 
     socket.on("create-room", (name) =>{ 
@@ -53,7 +60,7 @@ io.on("connection", (socket) => {
         let player = room.addPlayer(name);
         rooms.push(room);
         
-        socket.emit("room-created", {code: room.roomCode, playerID: player.ID, name: player.name});
+        socket.emit("room-created", {code: room.roomCode, player: player});
     })
 
     socket.on("add-chip", (data) => {
@@ -86,7 +93,7 @@ io.on("connection", (socket) => {
     socket.on("remove-chip", (data) =>{
       let room = rooms.find(r => r.roomCode === data.code);
       if(!room) return;
-      if(room.chipValues.hasOwnProperty(data.colour)){
+      if(room.chipValues.hasOwnProperty(data.colour)){ // checks whether colour actually exists
         delete room.chipValues[data.colour];
       }
     })
@@ -95,7 +102,7 @@ io.on("connection", (socket) => {
       let room = rooms.find(r => r.roomCode === data.code);
       if(!room) return;
 
-      if(Object.keys(room.chipValues).length == 0){
+      if(Object.keys(room.chipValues).length == 0){ // checks whether any keys exist
         socket.emit("chip-confirm-result", {success: false, error: "No chips added"});
         return;
       }
