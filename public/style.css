@@ -133,3 +133,9 @@ input {
   transform: scale(1.15);
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
 }
+
+#playerList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

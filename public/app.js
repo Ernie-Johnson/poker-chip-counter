@@ -72,9 +72,12 @@ socket.on("join-room-result", (data) => {
     currentRoom = {code: data.code, playerID: data.player.ID};
     showScreen("screen-lobby");
     document.getElementById("roomCodeDisplay").textContent = currentRoom.code;
-    renderPlayerList(data.players);
   }
 
+})
+
+socket.on("player-joined", (data) => {
+  renderPlayerList(data.players);
 })
 
 // Switch between screens

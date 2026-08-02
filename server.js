@@ -52,7 +52,9 @@ io.on("connection", (socket) => {
       }
 
       let player = room.addPlayer(data.name);
-      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players})
+      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players});
+      socket.join(room.roomCode);
+      io.to(room.roomCode).emit("player-joined", { players: room.players });
     })
 
     socket.on("create-room", (name) =>{ 
@@ -61,6 +63,7 @@ io.on("connection", (socket) => {
         rooms.push(room);
         
         socket.emit("room-created", {code: room.roomCode, player: player});
+        socket.join(room.roomCode);
     })
 
     socket.on("add-chip", (data) => {
