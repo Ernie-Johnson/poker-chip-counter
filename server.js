@@ -55,42 +55,46 @@ io.on("connection", (socket) => {
       socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players});
       socket.join(room.roomCode);
       io.to(room.roomCode).emit("player-joined", { players: room.players });
+      socket.roomCode = room.roomCode;
+      socket.playerID = player.ID;
     })
 
     socket.on("create-room", (name) =>{ 
-        let room = new Room();
-        let player = room.addPlayer(name);
-        rooms.push(room);
-        
-        socket.emit("room-created", {code: room.roomCode, player: player});
-        socket.join(room.roomCode);
+      let room = new Room();
+      let player = room.addPlayer(name);
+      rooms.push(room);
+      
+      socket.emit("room-created", {code: room.roomCode, player: player});
+      socket.join(room.roomCode);
+      socket.roomCode = room.roomCode;
+      socket.playerID = player.ID;
     })
 
     socket.on("add-chip", (data) => {
-        let room = rooms.find(r => r.roomCode === data.code);
+      let room = rooms.find(r => r.roomCode === data.code);
 
-        if(!room){
-          socket.emit("chip-add-result", {success: false, error: "Room not found"});
-          return;
-        }
+      if(!room){
+        socket.emit("chip-add-result", {success: false, error: "Room not found"});
+        return;
+      }
 
-        if(!data.colour){ // checks whether a colour has been selected
-          socket.emit("chip-add-result", {success: false, error: "No colour selected"});
-          return;
-        }
+      if(!data.colour){ // checks whether a colour has been selected
+        socket.emit("chip-add-result", {success: false, error: "No colour selected"});
+        return;
+      }
 
-        if(data.value < 1 || !Number.isInteger(data.value)){
-          socket.emit("chip-add-result", {success: false, error: "Chip value is invalid. Should be at least 1 and an integer"});
-          return;
-        }
+      if(data.value < 1 || !Number.isInteger(data.value)){
+        socket.emit("chip-add-result", {success: false, error: "Chip value is invalid. Should be at least 1 and an integer"});
+        return;
+      }
 
-        if(room.chipValues.hasOwnProperty(data.colour)){ // checks whether colour has already been used
-          socket.emit("chip-add-result", {success: false, error: "Chip colour already exists"});
-          return;
-        }
+      if(room.chipValues.hasOwnProperty(data.colour)){ // checks whether colour has already been used
+        socket.emit("chip-add-result", {success: false, error: "Chip colour already exists"});
+        return;
+      }
 
-        room.chipValues[data.colour] = data.value;
-        socket.emit("chip-add-result", {success: true, colour: data.colour, value: data.value})
+      room.chipValues[data.colour] = data.value;
+      socket.emit("chip-add-result", {success: true, colour: data.colour, value: data.value})
     })
 
     socket.on("remove-chip", (data) =>{
@@ -112,6 +116,17 @@ io.on("connection", (socket) => {
       socket.emit("chip-confirm-result", {success: true});
     })
 
+    socket.on("disconnect", () => {
+      if(!socket.roomCode) return;
+      if(!socket.playerID) return;
+
+      let room = rooms.find(r => r.roomCode === socket.roomCode);
+      if(!room) return;
+
+      room.players = room.players.filter(r => r.ID !== socket.playerID);
+
+      io.to(room.roomCode).emit("player-joined", { players: room.players });
+    })
   
 });
 app.use(express.static("public"));
