@@ -95,9 +95,17 @@ socket.on("chip-count-result", (data) => {
 
     let chipCounter = document.createElement("input");
     chipCounter.value = data.chipCount[colour];
+    chipCounter.dataset.colour = colour;
+    chipCounter.type = "number";
     newDiv.appendChild(chipCounter);
 
     chipEntry.appendChild(newDiv);
+  }
+})
+
+socket.on("chip-save-result", (data) => {
+  if(data.success === false){
+    return alert(data.error);
   }
 })
 
@@ -187,4 +195,11 @@ function renderPlayerList(players){
 
 function openChipEntry(){
   socket.emit("get-chip-count", {code: currentRoom.code})
+}
+
+function saveChipEntry(){
+  let chips = {};
+  document.querySelectorAll("#chip-entry-box input").forEach(s => chips[s.dataset.colour] = Number(s.value));
+  socket.emit("chip-save", {code: currentRoom.code, chips: chips});
+  document.getElementById("chip-entry-overlay").classList.add("hidden");
 }

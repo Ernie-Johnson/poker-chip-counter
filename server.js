@@ -144,6 +144,28 @@ io.on("connection", (socket) => {
 
       socket.emit("chip-count-result", {chipCount: player.chipCount, colours: Object.keys(room.chipValues)});
     })
+
+    socket.on("chip-save", (data) => {
+      let room = rooms.find(r => r.roomCode === data.code);
+      if(!room) return;
+
+      let player = room.players.find(r => r.ID === socket.playerID);
+      if(!player) return;
+
+      let valid = Object.values(data.chips).every(v => Number(v) >= 0 && Number.isInteger(Number(v)));
+      if(!valid){
+        socket.emit("chip-save-result", {success: false, error: "Chip inputs are invalid"});
+        return;
+      } 
+
+      if(!player.chipCount){
+        player.chipCount = {};
+      } 
+
+      for(let colour of Object.keys(data.chips)){
+        player.chipCount[colour] = Number(data.chips[colour])
+      }
+    })
   
 });
 app.use(express.static("public"));
