@@ -64,7 +64,13 @@
     <h2>Players:</h2>
     <div id="playerList">
     </div>
-    <button> </button>
+    <button onclick="openChipEntry()" id="chip-entry-button">Alter chips</button>
+  </div>
+
+  <div class="hidden" id="chip-entry-overlay">
+    <div id="chip-entry-box">
+
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

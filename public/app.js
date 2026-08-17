@@ -9,13 +9,13 @@ window.onload = function(){
 
 // Updates screen once confirmed room is created
 socket.on("room-created", (data) => {
-  currentRoom = {code: data.code, playerID: data.player.ID}; // used to identify which room player is in
+  currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours}; // used to identify which room player is in
   addPlayerUI(data.player);
   showScreen("screen-chips");
 })
 
 // Updates screen once chip has been confirmed
-socket.on("chip-add-result", (data) => { // data contains: success, colour, value (if successfull)
+socket.on("chip-add-result", (data) => { // data contains: success, colour, value (if successful)
   if(data.success === false){
     return alert(data.error);
   }
@@ -69,7 +69,7 @@ socket.on("join-room-result", (data) => {
     return alert(data.error);
   }
   else if(data.success === true){
-    currentRoom = {code: data.code, playerID: data.player.ID};
+    currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours};
     showScreen("screen-lobby");
     document.getElementById("roomCodeDisplay").textContent = currentRoom.code;
   }
@@ -78,6 +78,27 @@ socket.on("join-room-result", (data) => {
 
 socket.on("player-joined", (data) => {
   renderPlayerList(data.players);
+})
+
+socket.on("chip-count-result", (data) => {
+  document.getElementById("chip-entry-overlay").classList.remove("hidden");
+
+  let chipEntry = document.getElementById("chip-entry-box");
+  chipEntry.replaceChildren();
+
+  for(let colour of data.colours){
+    let newDiv = document.createElement("div");
+
+    let chipColour = document.createElement("label");
+    chipColour.textContent = colour;
+    newDiv.appendChild(chipColour);
+
+    let chipCounter = document.createElement("input");
+    chipCounter.value = data.chipCount[colour];
+    newDiv.appendChild(chipCounter);
+
+    chipEntry.appendChild(newDiv);
+  }
 })
 
 // Switch between screens
@@ -162,4 +183,8 @@ function renderPlayerList(players){
   for (let player of players){
     addPlayerUI(player);
   } 
+}
+
+function openChipEntry(){
+  socket.emit("get-chip-count", {code: currentRoom.code})
 }

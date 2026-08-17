@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
       }
 
       let player = room.addPlayer(data.name);
-      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players});
+      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players, colours: Object.keys(room.chipValues)});
       socket.join(room.roomCode);
       io.to(room.roomCode).emit("player-joined", { players: room.players });
       socket.roomCode = room.roomCode;
@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
       let player = room.addPlayer(name);
       rooms.push(room);
       
-      socket.emit("room-created", {code: room.roomCode, player: player});
+      socket.emit("room-created", {code: room.roomCode, player: player, colours: Object.keys(room.chipValues)});
       socket.join(room.roomCode);
       socket.roomCode = room.roomCode;
       socket.playerID = player.ID;
@@ -126,6 +126,23 @@ io.on("connection", (socket) => {
       room.players = room.players.filter(r => r.ID !== socket.playerID);
 
       io.to(room.roomCode).emit("player-joined", { players: room.players });
+    })
+
+    socket.on("get-chip-count", (data) => {
+      let room = rooms.find(r => r.roomCode === data.code);
+      if(!room) return;
+
+      let player = room.players.find(r => r.ID === socket.playerID);
+      if(!player) return;
+
+      if(!player.chipCount){
+        player.chipCount = {};
+        for(let colour of Object.keys(room.chipValues)){
+          player.chipCount[colour] = 0;
+        }
+      }
+
+      socket.emit("chip-count-result", {chipCount: player.chipCount, colours: Object.keys(room.chipValues)});
     })
   
 });
