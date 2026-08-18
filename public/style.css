@@ -161,3 +161,15 @@ input {
   width: 90%;
   max-width: 400px;
 }
+
+#playerList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#playerList > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

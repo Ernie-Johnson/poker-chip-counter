@@ -9,8 +9,9 @@ window.onload = function(){
 
 // Updates screen once confirmed room is created
 socket.on("room-created", (data) => {
-  currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours}; // used to identify which room player is in
-  addPlayerUI(data.player);
+  currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours, total: {}}; // used to identify which room player is in
+  let total = currentRoom.total[data.player.ID] ?? 0;
+  addPlayerUI(data.player, total);
   showScreen("screen-chips");
 })
 
@@ -69,7 +70,7 @@ socket.on("join-room-result", (data) => {
     return alert(data.error);
   }
   else if(data.success === true){
-    currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours};
+    currentRoom = {code: data.code, playerID: data.player.ID, colours: data.colours, total: data.total};
     showScreen("screen-lobby");
     document.getElementById("roomCodeDisplay").textContent = currentRoom.code;
   }
@@ -107,6 +108,13 @@ socket.on("chip-save-result", (data) => {
   if(data.success === false){
     return alert(data.error);
   }
+})
+
+socket.on("new-total", (data) => {
+  currentRoom.total = data.total;
+  renderPlayerList(data.players);
+  let roomTotal = Object.values(currentRoom.total).reduce((accumulator, current) => accumulator + current, 0);
+  document.getElementById("roomTotalDisplay").textContent = formatPence(roomTotal);
 })
 
 // Switch between screens
@@ -162,11 +170,19 @@ function confirmChips(){
   socket.emit("confirm-chip", {code: currentRoom.code});
 }
 
-function addPlayerUI(player){
+function addPlayerUI(player, total){
   let playerList = document.getElementById("playerList");
-  let newPlayer = document.createElement("span");
-  newPlayer.textContent = player.name;
-  playerList.appendChild(newPlayer);
+  let newDiv = document.createElement("div");
+
+  let nameSpan = document.createElement("span");
+  nameSpan.textContent = player.name;
+  newDiv.appendChild(nameSpan);
+
+  let totalSpan = document.createElement("span");
+  totalSpan.textContent = formatPence(total);
+  newDiv.appendChild(totalSpan);
+  
+  playerList.appendChild(newDiv);
 }
 
 function joinRoom(){
@@ -189,7 +205,8 @@ function renderPlayerList(players){
   playerList.replaceChildren();
 
   for (let player of players){
-    addPlayerUI(player);
+    let playerTotal = currentRoom.total[player.ID] ?? 0;
+    addPlayerUI(player, playerTotal);
   } 
 }
 
@@ -202,4 +219,11 @@ function saveChipEntry(){
   document.querySelectorAll("#chip-entry-box input").forEach(s => chips[s.dataset.colour] = Number(s.value));
   socket.emit("chip-save", {code: currentRoom.code, chips: chips});
   document.getElementById("chip-entry-overlay").classList.add("hidden");
+}
+
+function formatPence(pence) {
+  if (pence < 100) {
+    return `${pence}p`;
+  }
+  return `£${(pence / 100).toFixed(2)}`;
 }

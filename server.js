@@ -38,6 +38,22 @@ class Room{
   setChipValues(values){ // should be an object as the parameter
     this.chipValues = values;
   }
+  calculateTotal(){
+    let total = {}
+    for(let player of this.players){
+      let sum = 0;
+      if(!player.chipCount){
+        total[player.ID] = 0;
+      }
+      else{
+        for(let colour of Object.keys(player.chipCount)){
+          sum += player.chipCount[colour] * this.chipValues[colour];
+        }
+        total[player.ID] = sum;
+      }
+    }
+    return total;
+  }
 }
 
 let io = new Server(server);
@@ -52,7 +68,7 @@ io.on("connection", (socket) => {
       }
 
       let player = room.addPlayer(data.name);
-      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players, colours: Object.keys(room.chipValues)});
+      socket.emit("join-room-result", {success: true, player: player, code: room.roomCode, players: room.players, colours: Object.keys(room.chipValues), total: room.calculateTotal()});
       socket.join(room.roomCode);
       io.to(room.roomCode).emit("player-joined", { players: room.players });
       socket.roomCode = room.roomCode;
@@ -165,6 +181,9 @@ io.on("connection", (socket) => {
       for(let colour of Object.keys(data.chips)){
         player.chipCount[colour] = Number(data.chips[colour])
       }
+
+      let total = room.calculateTotal();
+      io.to(room.roomCode).emit("new-total", {total: total, players: room.players});
     })
   
 });
