@@ -5,6 +5,10 @@ let selectedColour = null;
 
 window.onload = function(){
   document.querySelectorAll("#colourPalette button").forEach(s => s.style.backgroundColor = s.dataset.hex)
+  submitOnEnter(document.getElementById("host-name"), createRoom);
+  submitOnEnter(document.getElementById("player-name"), joinRoom);
+  submitOnEnter(document.getElementById("room-code"), joinRoom);
+  submitOnEnter(document.getElementById("chipValue"), addChip);
 }
 
 // Updates screen once confirmed room is created
@@ -84,7 +88,7 @@ socket.on("player-joined", (data) => {
 socket.on("chip-count-result", (data) => {
   document.getElementById("chip-entry-overlay").classList.remove("hidden");
 
-  let chipEntry = document.getElementById("chip-entry-box");
+  let chipEntry = document.getElementById("chip-entry-fields");
   chipEntry.replaceChildren();
 
   for(let colour of data.colours){
@@ -216,7 +220,7 @@ function openChipEntry(){
 
 function saveChipEntry(){
   let chips = {};
-  document.querySelectorAll("#chip-entry-box input").forEach(s => chips[s.dataset.colour] = Number(s.value));
+  document.querySelectorAll("#chip-entry-fields input").forEach(s => chips[s.dataset.colour] = Number(s.value));
   socket.emit("chip-save", {code: currentRoom.code, chips: chips});
   document.getElementById("chip-entry-overlay").classList.add("hidden");
 }
@@ -226,4 +230,12 @@ function formatPence(pence) {
     return `${pence}p`;
   }
   return `£${(pence / 100).toFixed(2)}`;
+}
+
+function submitOnEnter(inputElement, callback) {
+  inputElement.onkeydown = function(event) {
+    if (event.key === "Enter") {
+      callback();
+    }
+  };
 }
