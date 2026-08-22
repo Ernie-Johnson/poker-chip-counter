@@ -142,6 +142,10 @@ io.on("connection", (socket) => {
       room.players = room.players.filter(r => r.ID !== socket.playerID);
 
       io.to(room.roomCode).emit("player-joined", { players: room.players });
+
+      if(room.players.length === 0){
+        rooms = rooms.filter(r => r.roomCode !== room.roomCode)
+      }
     })
 
     socket.on("get-chip-count", (data) => {
